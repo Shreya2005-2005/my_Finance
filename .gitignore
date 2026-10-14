@@ -1,0 +1,31 @@
+# dependencies
+node_modules/
+
+# secrets: never commit real keys
+.env
+.env.*
+!.env.example
+
+# build / tool output
+dist/
+coverage/
+.convex/
+*.log
+
+# python eval harness
+eval/.venv/
+__pycache__/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# test runner output
+.vitest/
+
+# SvelteKit / Vite build output
+.svelte-kit/
+build/
+

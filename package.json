@@ -1,0 +1,35 @@
+{
+  "name": "verifin",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Verifin: agentic financial research with automated citation verification",
+  "scripts": {
+    "dev": "vite dev",
+    "build": "vite build",
+    "preview": "vite preview",
+    "prepare": "svelte-kit sync || echo",
+    "status": "node scripts/dev/status-server.ts",
+    "typecheck": "svelte-kit sync && tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "spike:gdelt": "node scripts/spike/gdelt.ts",
+    "spike:mfapi": "node scripts/spike/mfapi.ts",
+    "spike:finnhub": "node --env-file-if-exists=.env.local scripts/spike/finnhub.ts",
+    "spike:stocks": "node --env-file-if-exists=.env.local scripts/spike/stocks.ts"
+  },
+  "dependencies": {
+    "convex": "^1.46.0",
+    "unpdf": "^1.8.1"
+  },
+  "devDependencies": {
+    "@sveltejs/adapter-auto": "^7.0.1",
+    "@sveltejs/kit": "^2.70.3",
+    "@sveltejs/vite-plugin-svelte": "^7.3.1",
+    "@types/node": "^26.6.5",
+    "svelte": "^5.57.2",
+    "typescript": "^6.0.3",
+    "vite": "^8.3.4",
+    "vitest": "^5.0.4"
+  }
+}
