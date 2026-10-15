@@ -59,7 +59,8 @@ Built and tested as plain code (works without any login or key):
 - [x] **Watch logic:** event type, importance, 3-level duplicate merge, alert planning
 - [x] **Invest logic:** returns, risk, SIP return, deterministic ranking with reasons and risk flags
 - [x] **Claims and questions:** one search box takes a name, a question ("Oracle last year profit") or a claim ("Oracle had a profit of 50%"); Gemini labels the sentence, plain code compares it with official yearly figures from the SEC (US companies) and gives a verdict
-- [x] **Tests:** 310 automated tests including false-citation, seeded-conflict, unit-trap, injection and failure tests
+- [x] **Indian market news:** the top 5 to 10 Indian finance stories on the Research page, from free public feeds (Economic Times, Mint, Business Standard, BusinessLine, RBI, SEBI), with each outlet's own photo
+- [x] **Tests:** 422 automated tests including false-citation, seeded-conflict, unit-trap, injection and failure tests
 - [x] **Local status page** with live demos
 
 Still to do:

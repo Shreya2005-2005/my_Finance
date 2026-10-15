@@ -21,6 +21,13 @@ export async function cached<T>(key: string, ttlMs: number, make: () => Promise<
   return value;
 }
 
+/**
+ * How we introduce ourselves to outside websites (Wikimedia, the news feeds, the SEC). We always say who we are:
+ * set CONTACT_USER_AGENT (or SEC_USER_AGENT) in .env.local to your name and email.
+ */
+export const contactAgent = (): string =>
+  env.CONTACT_USER_AGENT || env.SEC_USER_AGENT || "Verifin student research project (set CONTACT_USER_AGENT to your name and email)";
+
 /** Forgets one saved answer (used so a failed call is never kept). */
 export const forget = (key: string) => void store.delete(key);
 

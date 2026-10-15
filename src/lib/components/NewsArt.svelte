@@ -7,7 +7,7 @@
    *   3. otherwise a plain dark panel with the outlet's name (no decoration pretending to be a photo).
    */
   type Topic = { url: string; credit: string; license: string; pageUrl: string; title: string };
-  let { source, image, photo, small = false }: { source: string; image?: string; photo?: Topic; small?: boolean } = $props();
+  let { source, image, photo, small = false, compact = false }: { source: string; image?: string; photo?: Topic; small?: boolean; compact?: boolean } = $props();
 
   let imageBroken = $state(false);
   let photoBroken = $state(false);
@@ -15,7 +15,7 @@
   const showTopic = $derived(!showReal && Boolean(photo) && !photoBroken);
 </script>
 
-<div class="art" class:small>
+<div class="art" class:small class:compact>
   {#if showReal}
     <img src={image} alt="" loading="lazy" referrerpolicy="no-referrer" onerror={() => (imageBroken = true)} />
   {:else if showTopic && photo}
@@ -76,6 +76,24 @@
   .credit a {
     color: #fff;
     text-underline-offset: 2px;
+  }
+  .compact .tag {
+    top: 8px;
+    left: 8px;
+    padding: 2px 8px;
+    font-size: 0.6rem;
+  }
+  .compact .credit {
+    padding: 4px 8px;
+    font-size: 0.6rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .compact .outlet {
+    left: 14px;
+    bottom: 12px;
+    font-size: 1.2rem;
   }
   .outlet {
     position: absolute;

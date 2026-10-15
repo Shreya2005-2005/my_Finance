@@ -40,6 +40,8 @@ export interface WatchAlertsResponse {
   /** How many recognised stories there were before picking the top 5. */
   totalStories: number;
   fetchedAt: number;
+  /** Plain-words remarks, for example a news source that could not be read just now. */
+  notes?: string[];
   error?: string;
 }
 // ---------- invest ----------
@@ -227,9 +229,11 @@ export interface AskResponse {
 
 // ---------- daily news ----------
 export interface DailyNewsResponse {
-  items: Array<{ headline: string; source: string; url: string; publishedAt: number; summary?: string; image?: string; photo?: { url: string; credit: string; license: string; pageUrl: string; title: string }; alsoBy: string[] }>;
+  items: Array<{ headline: string; source: string; url: string; publishedAt: number; summary?: string; image?: string; official?: boolean; photo?: { url: string; credit: string; license: string; pageUrl: string; title: string }; alsoBy: string[] }>;
   /** How far back the list had to look to find at least 5 stories (24, 48 or 72 hours). */
   windowHours: number;
   fetchedAt: number;
+  /** Plain-words remarks, for example a news source that could not be read just now. */
+  notes?: string[];
   error?: string;
 }

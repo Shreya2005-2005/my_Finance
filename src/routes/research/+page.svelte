@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
+  import IndiaNews from "$lib/components/IndiaNews.svelte";
   import { bestQuoteFor, relatedStories } from "$engine/claims/related.ts";
   import { approxEqual, extractNumbers } from "$engine/lib/numbers.ts";
   import { eventLabel, formatDate, timeAgo, tierLabel, tierTone } from "$lib/format";
@@ -308,6 +309,8 @@
     <h1>Research any company</h1>
     <p class="muted lead">Type a company name for a briefing, ask a question like “Oracle last year profit”, or paste a claim you saw, like “Oracle had a profit of 50%”, to check it against the company's official figures.</p>
   </header>
+
+  <IndiaNews />
 
   <form class="card form" onsubmit={(e) => { e.preventDefault(); submit(); }}>
     <label class="field grow">

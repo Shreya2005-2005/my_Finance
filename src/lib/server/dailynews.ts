@@ -6,50 +6,12 @@ import { CACHE_TTL_MS } from "$config/engine.ts";
 import { pickDailyNews } from "$engine/news/daily.ts";
 import { withRetry } from "$engine/lib/resilience.ts";
 import { assignPhotos, firstQueries } from "$engine/news/photos.ts";
-import { searchPhotos, type Photo } from "$engine/providers/commons.ts";
 import { marketNews } from "$engine/providers/finnhub.ts";
 import type { DailyNewsResponse } from "$lib/types";
 import { cached, forget, providerContext } from "./context";
+import { PHOTO_BUDGET_MS, photosFor } from "./photos";
 
 const KEY = "dailynews5";
-const DAY = 24 * 60 * 60 * 1000;
-
-/**
- * Wikimedia asks programs to make ONE request at a time and to back off when told "too many requests". So: no parallel
- * searches, no waiting out a "slow down" (a visitor never waits for it), and every answer is remembered for a day.
- */
-let blockedUntil = 0;
-let nextSlot = 0;
-const SPACING_MS = 1_500; // about one search a second
-const PHOTO_BUDGET_MS = 22_000; // the photo step never holds the page longer than this
-
-/** Photos for one search, remembered for a day. Nothing is remembered when the search failed or found nothing. */
-async function photosFor(query: string, deadline: number): Promise<Photo[]> {
-  const ctx = providerContext();
-  const key = `commons1:${query.toLowerCase()}`;
-  const found = await cached<Photo[] | null>(key, DAY, async () => {
-    if (Date.now() < blockedUntil || Date.now() > deadline) return null;
-    // Space the requests out: Wikimedia's limit is on how fast they arrive, not only on how many.
-    const wait = nextSlot - Date.now();
-    nextSlot = Math.max(nextSlot, Date.now()) + SPACING_MS;
-    if (wait > 0) await new Promise((res) => setTimeout(res, wait));
-    if (Date.now() > deadline) return null;
-    let r = await searchPhotos(query, ctx);
-    // A short "slow down" (a few seconds) is waited out once, inside the time budget, so this story still gets its photo.
-    if (!r.ok && r.error.kind === "RATE_LIMITED" && (r.error.retryAfterMs ?? Infinity) <= 8_000 && Date.now() + (r.error.retryAfterMs ?? 0) < deadline) {
-      await new Promise((res) => setTimeout(res, (r.ok ? 0 : (r.error.retryAfterMs ?? 0)) + 300));
-      nextSlot = Date.now() + SPACING_MS;
-      r = await searchPhotos(query, ctx);
-    }
-    if (!r.ok) {
-      if (r.error.kind === "RATE_LIMITED") blockedUntil = Date.now() + Math.min(r.error.retryAfterMs ?? 60_000, 5 * 60_000);
-      return null;
-    }
-    return r.value;
-  });
-  if (!found?.length) forget(key);
-  return found ?? [];
-}
 
 export async function dailyNews(): Promise<DailyNewsResponse> {
   const ctx = providerContext();

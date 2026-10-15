@@ -14,6 +14,8 @@ const TERMS = [
   // markets and shares
   "markets?", "stocks?", "shares?", "equit(?:y|ies)", "wall street", "s&p(?: 500)?", "dow(?: jones)?", "nasdaq", "nikkei", "ftse", "dax", "nifty", "sensex", "hang seng", "bourse",
   "rall(?:y|ies|ied)", "selloff", "sell-off", "bull market", "bear market",
+  // Indian markets and money
+  "crores?", "lakh crores?", "fii", "fiis", "dii", "diis", "gst", "repo(?: rate)?", "sips?", "demat", "nbfcs?", "npas?", "irdai", "sebi", "market cap", "m-cap", "target price", "block deal", "bulk deal", "stock split", "bonus issue", "disinvestment", "divestment", "q[1-4] results", "q[1-4] fy\\d+", "result today", "results today",
   // companies' results and deals
   "earnings", "profits?", "revenues?", "quarterly results", "guidance", "ipo", "merger", "acqui(?:re|res|red|sition|sitions)", "takeover", "buyout", "private equity", "dividends?", "buybacks?", "bankruptcy",
   "offer price", "share price", "stock price", "price (?:cut|cuts|hike|hikes|war)", "bids?", "takeover bids?", "stakes?", "assets?", "investors?", "investments?", "invests?", "analysts?", "price target", "hedge fund", "mutual fund", "etfs?", "funds?",

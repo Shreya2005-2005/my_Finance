@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:media="http://search.yahoo.com/mrss/" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:bs="https://www.business-standard.com/rss/">
+  <channel>
+    <title><![CDATA[Share Market Today]]></title>
+    <link>https://www.business-standard.com/markets</link>
+    <description><![CDATA[Stay updated with the latest stock market news and live updates. Get real-time insights on Sensex Today, Nifty Live, stock market today, IPO news and more on Business Standard.]]></description>
+    <copyright>Business Standard</copyright>
+    <lastBuildDate>Thu, 15 Oct 2026 14:47:39 +0530</lastBuildDate>
+    <language>en-us</language>
+    <image>
+      <title>Markets</title>
+      <url>https://www.business-standard.com/markets</url>
+      <link>https://www.business-standard.com/markets</link>
+    </image>
+    <atom:link href="https://www.business-standard.com/rss/markets-106.rss" rel="self" type="application/rss+xml"/>
+    <item>
+      <title><![CDATA[IDBI Bank stake sale to push divestment to 8-year high, exceed FY27 target]]></title>
+      <link>https://www.business-standard.com/markets/news/idbi-bank-stake-sale-to-push-divestment-to-8-year-high-exceed-fy27-target-126101500652_1.html</link>
+      <guid>https://www.business-standard.com/markets/news/idbi-bank-stake-sale-to-push-divestment-to-8-year-high-exceed-fy27-target-126101500652_1.html</guid>
+      <description><![CDATA[The total stake sale approved in IDBI Bank to Canada-based Fairfax Holdings is ₹52,878 crore, with Life Insurance Corporation of India (LIC) and the government selling a combined 60.72 per cent stake]]></description>
+      <media:content url="https://bsmedia.business-standard.com/_media/bs/img/article/default/1261015/full-126101500652.jpg">
+        <media:title>Divestment</media:title>
+      </media:content>
+      <pubDate>Thu, 15 Oct 2026 14:43:37 +0530</pubDate>
+      <bs:lastModification>Thu, 15 Oct 2026 14:43:37 +0530</bs:lastModification>
+      <bs:keywords>IDBI Bank stake sale, IDBI Bank divestment, divestment target, FY27 divestment, markets, Indian stock market, PSU divestment, PSU stocks</bs:keywords>
+      <dc:publisher>Business Standard</dc:publisher>
+      <category>Markets</category>
+      <category>News</category>
+      <bs:section>Markets</bs:section>
+      <bs:subsection>News</bs:subsection>
+      <bs:source>Business Standard</bs:source>
+      <bs:contentType>News</bs:contentType>
+    </item>
+<item>
+      <title><![CDATA[Sky Gold surges 26% in October; stock up over 3-fold thus far in FY27]]></title>
+      <link>https://www.business-standard.com/markets/news/sky-gold-surges-26-in-october-stock-up-over-3-fold-thus-far-in-fy27-126101500625_1.html</link>
+      <guid>https://www.business-standard.com/markets/news/sky-gold-surges-26-in-october-stock-up-over-3-fold-thus-far-in-fy27-126101500625_1.html</guid>
+      <description><![CDATA[Sky Gold and Diamonds' share price hit a new high of ₹1,021.95, surging 6% on the BSE in Thursday's intraday trade.]]></description>
+      <media:content url="https://bsmedia.business-standard.com/_media/bs/img/article/default/1261015/full-126101500625.jpg">
+        <media:title>Jewellery</media:title>
+      </media:content>
+      <pubDate>Thu, 15 Oct 2026 14:34:23 +0530</pubDate>
+      <bs:lastModification>Thu, 15 Oct 2026 14:46:23 +0530</bs:lastModification>
+      <bs:keywords>Markets, Sky Gold and Diamonds, gold jewellery, American diamonds, Natural Diamonds, Lab Grown Diamonds, colour gem stones, Joyalukkas, Malabar, Senco Gold, Equirus Securities</bs:keywords>
+      <dc:publisher>Business Standard</dc:publisher>
+      <category>Markets</category>
+      <category>News</category>
+      <bs:section>Markets</bs:section>
+      <bs:subsection>News</bs:subsection>
+      <bs:source>Business Standard</bs:source>
+      <bs:contentType>News</bs:contentType>
+    </item>
+<item>
+      <title><![CDATA[Tonbo Imaging IPO fully subscribed on day 1; here's what brokerages suggest]]></title>
+      <link>https://www.business-standard.com/markets/news/tonbo-imaging-ipo-fully-subscribed-on-day-1-here-s-what-brokerages-suggest-126101500650_1.html</link>
+      <guid>https://www.business-standard.com/markets/news/tonbo-imaging-ipo-fully-subscribed-on-day-1-here-s-what-brokerages-suggest-126101500650_1.html</guid>
+      <description><![CDATA[Tonbo Imaging India IPO bidding opened for subscription on Oct 15, 2026 and will close on Oct 19.]]></description>
+      <media:content url="https://bsmedia.business-standard.com/_media/bs/img/article/default/1261015/full-126101500650.jpg">
+        <media:title>Tonbo Imaging IPO fully subscribed on day 1; here's what brokerages suggest</media:title>
+      </media:content>
+      <pubDate>Thu, 15 Oct 2026 14:31:04 +0530</pubDate>
+      <bs:lastModification>Thu, 15 Oct 2026 14:32:04 +0530</bs:lastModification>
+      <bs:keywords>Tonbo Imaging, Tonbo Imaging ipo latest, Tonbo Imaging ipo open, Tonbo Imaging ipo bididng, nifty 50, sensex, markets</bs:keywords>
+      <dc:publisher>Business Standard</dc:publisher>
+      <category>Markets</category>
+      <category>News</category>
+      <bs:section>Markets</bs:section>
+      <bs:subsection>News</bs:subsection>
+      <bs:source>Business Standard</bs:source>
+      <bs:contentType>News</bs:contentType>
+    </item>
+  </channel>
+</rss>
