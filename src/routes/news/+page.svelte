@@ -64,7 +64,7 @@
   <header class="head">
     <p class="eyebrow">Verifin Daily news</p>
     <h1>Today's market headlines</h1>
-    <p class="muted lead">The day's money news from the last 24 hours: markets, companies, prices, interest rates, currencies and the economy, from outlets such as Reuters, CNBC and Bloomberg. One card for each event, newest first.</p>
+    <p class="muted lead">The day's money news from the last 24 hours, from outlets such as Reuters, CNBC and Bloomberg. One card for each event, newest first.</p>
   </header>
 
   {#if loading && !data}

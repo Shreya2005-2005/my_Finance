@@ -11,7 +11,7 @@ import type { DailyNewsResponse } from "$lib/types";
 import { cached, forget, providerContext } from "./context";
 import { PHOTO_BUDGET_MS, photosFor } from "./photos";
 
-const KEY = "dailynews5";
+const KEY = "dailynews6";
 
 export async function dailyNews(): Promise<DailyNewsResponse> {
   const ctx = providerContext();

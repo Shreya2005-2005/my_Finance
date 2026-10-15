@@ -204,3 +204,20 @@ describe("logos are not photos", () => {
     expect(r.items.filter((i) => i.image).length).toBe(2);
   });
 });
+
+describe("the word 'shares' as a verb is not money news", () => {
+  it("leaves out a story where someone merely shares something", () => {
+    expect(isFinancial("Marketing heritage to Gen Z: Neha Marda shares how Phitku is selling 'phitkari' without the grandma guilt")).toBe(false);
+    expect(isFinancial("Chef shares her recipe for a simple winter soup")).toBe(false);
+  });
+  it("keeps real share-price stories", () => {
+    for (const h of [
+      "Meta shares rise for a second straight day",
+      "Yes Bank shares nosedive 20% after SC ruling",
+      "Tata Motors shares in focus after offer",
+      "Shares of Infosys jump after results",
+      "Airline shares slide on fuel costs",
+      "Share price of HDFC Bank hits record",
+    ]) expect(isFinancial(h), h).toBe(true);
+  });
+});

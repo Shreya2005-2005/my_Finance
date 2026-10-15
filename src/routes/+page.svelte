@@ -20,11 +20,10 @@
 </svelte:head>
 
 <section class="hero wrap">
-  <p class="eyebrow">Financial research with receipts</p>
   <h1>Every claim,<br />checked against its source.</h1>
   <p class="lead">
-    Verifin collects what is published about a company, then checks each statement against the exact text it came from.
-    What passes is shown with its evidence. What does not is marked as unverified.
+    Your trust is what our research is built on.<br />
+    Every answer shows where it came from, so you can check it yourself.
   </p>
 </section>
 

@@ -83,7 +83,6 @@
   onfocusout={() => (paused = false)}
 >
   <div class="head">
-    <p class="eyebrow">Indian market today</p>
     <h2 id="india-title">Top finance news from India</h2>
   </div>
   <div class="rule" aria-hidden="true"></div>
@@ -166,11 +165,13 @@
     display: grid;
     gap: 4px;
   }
+  /* The heading uses the logo's style (as the home page headings do): thin, capital, widely spaced letters. */
   h2 {
-    font-family: var(--news-serif);
-    font-weight: 700;
-    font-size: clamp(1.5rem, 2.6vw, 2rem);
-    letter-spacing: -0.005em;
+    font-family: var(--font-brand);
+    font-weight: 300;
+    text-transform: uppercase;
+    font-size: clamp(0.85rem, 1.4vw, 1.05rem);
+    letter-spacing: 0.18em;
   }
   /* the fine double rule of a newspaper */
   .rule {
@@ -190,7 +191,7 @@
   /* ---------- the big slider ---------- */
   .hero {
     position: relative;
-    height: 300px;
+    height: 230px;
     border-radius: 6px;
     overflow: hidden;
     background: #0a0f0d;
@@ -201,7 +202,7 @@
   .side.skeleton {
     background: var(--surface-soft);
     box-shadow: none;
-    height: 300px;
+    height: 230px;
   }
   .slide {
     position: absolute;
@@ -233,9 +234,9 @@
     position: absolute;
     left: 76px;
     right: 76px;
-    bottom: 44px;
+    bottom: 38px;
     display: grid;
-    gap: 10px;
+    gap: 8px;
     max-width: 620px;
     color: #fff;
   }
@@ -252,12 +253,12 @@
   .text h3 {
     font-family: var(--news-serif);
     font-weight: 600;
-    font-size: clamp(1.25rem, 2.2vw, 1.8rem);
+    font-size: clamp(1.1rem, 1.9vw, 1.55rem);
     line-height: 1.2;
     color: #fff;
     display: -webkit-box;
-    -webkit-line-clamp: 3;
-    line-clamp: 3;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
@@ -388,7 +389,7 @@
   }
   .sphoto {
     position: relative;
-    height: 112px;
+    height: 84px;
     border-radius: 4px;
     overflow: hidden;
     background: #0a0f0d;
@@ -446,7 +447,7 @@
     }
     .hero,
     .hero.skeleton {
-      height: 340px;
+      height: 290px;
     }
     /* On a phone the second photo only pushes the search box down: keep its headline, drop its picture. */
     .sphoto {

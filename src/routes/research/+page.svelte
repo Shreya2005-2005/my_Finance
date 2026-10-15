@@ -305,9 +305,7 @@
 
 <div class="wrap page">
   <header class="head">
-    <p class="eyebrow">Verifin Research</p>
     <h1>Research any company</h1>
-    <p class="muted lead">Type a company name for a briefing, ask a question like “Oracle last year profit”, or paste a claim you saw, like “Oracle had a profit of 50%”, to check it against the company's official figures.</p>
   </header>
 
   <IndiaNews />
@@ -737,8 +735,14 @@
     display: grid;
     gap: 8px;
   }
-  .lead {
-    max-width: 660px;
+  /* The page title uses the logo's style, like the home page headline: thin, capital, widely spaced letters. */
+  h1 {
+    font-family: var(--font-brand);
+    font-weight: 300;
+    text-transform: uppercase;
+    font-size: clamp(1.7rem, 3.8vw, 3rem);
+    letter-spacing: 0.12em;
+    line-height: 1.25;
   }
   .small {
     font-size: 0.85rem;

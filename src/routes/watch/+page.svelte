@@ -210,6 +210,15 @@
     display: grid;
     gap: 8px;
   }
+  /* The page title uses the logo's style, like the home page headline: thin, capital, widely spaced letters. */
+  h1 {
+    font-family: var(--font-brand);
+    font-weight: 300;
+    text-transform: uppercase;
+    font-size: clamp(1.7rem, 3.8vw, 3rem);
+    letter-spacing: 0.12em;
+    line-height: 1.25;
+  }
   .lead {
     max-width: 620px;
   }

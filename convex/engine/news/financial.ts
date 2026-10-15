@@ -12,7 +12,9 @@
 
 const TERMS = [
   // markets and shares
-  "markets?", "stocks?", "shares?", "equit(?:y|ies)", "wall street", "s&p(?: 500)?", "dow(?: jones)?", "nasdaq", "nikkei", "ftse", "dax", "nifty", "sensex", "hang seng", "bourse",
+  "markets?", "stocks?", "equit(?:y|ies)",
+  // "shares" alone is also a verb ("she shares how..."), so it counts only in money phrases
+  "shares? (?:of|in|price|prices|market|sale|capital|buyback|rise|rises|rose|fall|falls|fell|jump|jumps|jumped|surge|surges|surged|slump|slumps|slumped|tank|tanks|tanked|gain|gains|gained|drop|drops|dropped|climb|climbs|climbed|slide|slides|slid|plunge|plunges|plunged|rally|rallies|rallied|soar|soars|soared|dip|dips|dipped|nosedive|nosedives|crash|crashes|crashed|tumble|tumbles|tumbled|sink|sinks|sank|spike|spikes|spiked|end|ends|ended|close|closes|closed|open|opens|opened|edge|edges|slip|slips|slipped|hit|hits|extend|extends|extended|trade|trades|traded|falter|surrender|erase|erases)", "wall street", "s&p(?: 500)?", "dow(?: jones)?", "nasdaq", "nikkei", "ftse", "dax", "nifty", "sensex", "hang seng", "bourse",
   "rall(?:y|ies|ied)", "selloff", "sell-off", "bull market", "bear market",
   // Indian markets and money
   "crores?", "lakh crores?", "fii", "fiis", "dii", "diis", "gst", "repo(?: rate)?", "sips?", "demat", "nbfcs?", "npas?", "irdai", "sebi", "market cap", "m-cap", "target price", "block deal", "bulk deal", "stock split", "bonus issue", "disinvestment", "divestment", "q[1-4] results", "q[1-4] fy\\d+", "result today", "results today",
