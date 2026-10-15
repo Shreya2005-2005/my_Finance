@@ -140,7 +140,6 @@
             <p class="label">Up next</p>
             <div class="sphoto"><NewsArt source={next.source} image={next.image} photo={next.photo} bare /></div>
             <h4><a href={next.url} target="_blank" rel="noopener noreferrer">{next.headline}</a></h4>
-            {#if next.summary}<p class="ssum">{next.summary}</p>{/if}
             <p class="smeta"><b>{next.source}</b> · {timeAgo(next.publishedAt)}</p>
             <button type="button" class="more" onclick={() => go(at + 1)}>Show this story &rarr;</button>
           </article>
@@ -183,15 +182,15 @@
 
   .grid {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 300px;
-    gap: 28px;
+    grid-template-columns: minmax(0, 1fr) 280px;
+    gap: 24px;
     align-items: start;
   }
 
   /* ---------- the big slider ---------- */
   .hero {
     position: relative;
-    height: 400px;
+    height: 300px;
     border-radius: 6px;
     overflow: hidden;
     background: #0a0f0d;
@@ -202,7 +201,7 @@
   .side.skeleton {
     background: var(--surface-soft);
     box-shadow: none;
-    height: 400px;
+    height: 300px;
   }
   .slide {
     position: absolute;
@@ -232,12 +231,12 @@
   }
   .text {
     position: absolute;
-    left: 82px;
-    right: 82px;
-    bottom: 58px;
+    left: 76px;
+    right: 76px;
+    bottom: 44px;
     display: grid;
-    gap: 14px;
-    max-width: 640px;
+    gap: 10px;
+    max-width: 620px;
     color: #fff;
   }
   .badge {
@@ -253,12 +252,12 @@
   .text h3 {
     font-family: var(--news-serif);
     font-weight: 600;
-    font-size: clamp(1.5rem, 2.8vw, 2.35rem);
-    line-height: 1.18;
+    font-size: clamp(1.25rem, 2.2vw, 1.8rem);
+    line-height: 1.2;
     color: #fff;
     display: -webkit-box;
-    -webkit-line-clamp: 4;
-    line-clamp: 4;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
@@ -274,12 +273,12 @@
   .sum {
     margin: 0;
     max-width: 520px;
-    font-size: 0.9rem;
-    line-height: 1.55;
+    font-size: 0.84rem;
+    line-height: 1.5;
     color: rgb(255 255 255 / 82%);
     display: -webkit-box;
-    -webkit-line-clamp: 2;
-    line-clamp: 2;
+    -webkit-line-clamp: 1;
+    line-clamp: 1;
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
@@ -325,8 +324,8 @@
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
     border: 0;
     border-radius: 50%;
     background: #fff;
@@ -349,8 +348,8 @@
   }
   .dots {
     position: absolute;
-    left: 82px;
-    bottom: 22px;
+    left: 76px;
+    bottom: 18px;
     display: flex;
     gap: 6px;
   }
@@ -376,8 +375,8 @@
   .side {
     display: grid;
     align-content: start;
-    gap: 10px;
-    padding-top: 2px;
+    gap: 8px;
+    padding-top: 0;
   }
   .label {
     margin: 0;
@@ -389,7 +388,7 @@
   }
   .sphoto {
     position: relative;
-    aspect-ratio: 16 / 10;
+    height: 112px;
     border-radius: 4px;
     overflow: hidden;
     background: #0a0f0d;
@@ -397,11 +396,11 @@
   .side h4 {
     font-family: var(--news-serif);
     font-weight: 700;
-    font-size: 1.12rem;
+    font-size: 1rem;
     line-height: 1.3;
     display: -webkit-box;
-    -webkit-line-clamp: 4;
-    line-clamp: 4;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
@@ -412,17 +411,6 @@
   .side h4 a:hover {
     text-decoration: underline;
     text-underline-offset: 4px;
-  }
-  .ssum {
-    margin: 0;
-    font-size: 0.86rem;
-    line-height: 1.5;
-    color: var(--muted);
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
   }
   .smeta {
     margin: 0;
@@ -458,7 +446,7 @@
     }
     .hero,
     .hero.skeleton {
-      height: 420px;
+      height: 340px;
     }
     /* On a phone the second photo only pushes the search box down: keep its headline, drop its picture. */
     .sphoto {
@@ -468,12 +456,12 @@
       display: none;
     }
     .text {
-      left: 20px;
-      right: 20px;
-      bottom: 54px;
+      left: 18px;
+      right: 18px;
+      bottom: 42px;
     }
     .dots {
-      left: 20px;
+      left: 18px;
     }
     .arrow {
       top: 24%;
