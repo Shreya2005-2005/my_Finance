@@ -62,7 +62,6 @@
 
 <div class="wrap page">
   <header class="head">
-    <p class="eyebrow">Verifin Daily news</p>
     <h1>Today's market headlines</h1>
     <p class="muted lead">The day's money news from the last 24 hours, from outlets such as Reuters, CNBC and Bloomberg. One card for each event, newest first.</p>
   </header>
@@ -134,6 +133,15 @@
   .head {
     display: grid;
     gap: 8px;
+  }
+  /* The page title uses the logo's style, like the home page headline: thin, capital, widely spaced letters. */
+  h1 {
+    font-family: var(--font-brand);
+    font-weight: 300;
+    text-transform: uppercase;
+    font-size: clamp(1.7rem, 3.8vw, 3rem);
+    letter-spacing: 0.12em;
+    line-height: 1.25;
   }
   .lead {
     max-width: 660px;

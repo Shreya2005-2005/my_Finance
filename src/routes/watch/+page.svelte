@@ -119,7 +119,6 @@
 
 <div class="wrap page">
   <header class="head">
-    <p class="eyebrow">Verifin Watch</p>
     <h1>Your top 5 alerts</h1>
     <p class="muted lead">
       For each company you follow, we pick the <b>5 most important</b> recent stories. Repeated stories are merged, so one event is one alert.
