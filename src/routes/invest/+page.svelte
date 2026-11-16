@@ -2,7 +2,7 @@
   import { onMount } from "svelte";
   import { FUND_TYPES, GROUPS, RANK_STYLES, RISK_TONE, typeById, type FundGroup } from "$lib/fund-types";
   import { formatDate, metricLabel, metricValue } from "$lib/format";
-  import type { FundRow, FundsResponse } from "$lib/types";
+  import type { FundRow, FundsResponse, StockNewsResponse, StockRow, StocksResponse } from "$lib/types";
 
   // The two things a person can invest in. Stocks has no data feed yet, and the page says so plainly.
   let kind = $state<"funds" | "stocks">("funds");
@@ -42,14 +42,68 @@
 
   const pct = (key: string, v: number | undefined) => metricValue(key, v);
 
-  // What the Stocks section will rank, shown so the person can see what is coming. Nothing here is real data.
-  const stockKinds = [
-    { label: "Big, steady companies", text: "Household names that have been around for decades. They usually move less.", risk: "Medium to high" },
-    { label: "Growing companies", text: "Medium-sized businesses that can grow fast, and fall harder in bad times.", risk: "High" },
-    { label: "Small, fast-moving companies", text: "Small businesses. Big gains are possible, and so are big losses.", risk: "Very high" },
-    { label: "Companies that pay you regularly", text: "They share part of their profit with shareholders each year (a dividend).", risk: "Medium" },
-    { label: "By industry", text: "Banks, software, medicines, cars, everyday goods. Pick an industry you understand.", risk: "Medium to high" },
+  // ---- Stocks: top Indian companies (Nifty 50) from a free price feed ----
+  type StockList = "gainers" | "losers" | "active";
+  let stocks = $state<StocksResponse | null>(null);
+  let stocksLoading = $state(false);
+  let stocksError = $state("");
+  let list = $state<StockList>("gainers");
+  let sector = $state("all");
+  let openStock = $state<StockRow | null>(null);
+  let news = $state<StockNewsResponse | null>(null);
+  let newsLoading = $state(false);
+
+  const LISTS: Array<{ id: StockList; label: string; hint: string }> = [
+    { id: "gainers", label: "Top gainers", hint: "Rose the most since yesterday's close." },
+    { id: "losers", label: "Top losers", hint: "Fell the most since yesterday's close." },
+    { id: "active", label: "Most traded", hint: "The most rupees changed hands today. Busy stocks are easy to buy and sell." },
   ];
+  const sectors = $derived(stocks ? [...new Set(stocks.all.map((s) => s.sector))].sort() : []);
+  const shown = $derived.by(() => {
+    if (!stocks) return [];
+    if (sector === "all") return stocks[list];
+    const key = list === "gainers" ? (r: StockRow) => r.changePct : list === "losers" ? (r: StockRow) => -r.changePct : (r: StockRow) => r.turnover ?? 0;
+    return stocks.all.filter((r) => r.sector === sector).sort((a, b) => key(b) - key(a)).slice(0, 5);
+  });
+
+  async function loadStocks() {
+    if (stocks || stocksLoading) return;
+    stocksLoading = true;
+    stocksError = "";
+    try {
+      const d: StocksResponse = await (await fetch("/api/stocks")).json();
+      if (d.error) stocksError = d.error;
+      else stocks = d;
+    } catch {
+      stocksError = "Could not reach the server. Check that the website is still running.";
+    } finally {
+      stocksLoading = false;
+    }
+  }
+
+  async function toggleStock(s: StockRow) {
+    if (openStock?.symbol === s.symbol) return void (openStock = null);
+    openStock = s;
+    news = null;
+    newsLoading = true;
+    try {
+      const d: StockNewsResponse = await (await fetch(`/api/stocks?news=${encodeURIComponent(s.symbol)}`)).json();
+      if (openStock?.symbol === s.symbol) news = d;
+    } catch {
+      if (openStock?.symbol === s.symbol) news = { symbol: s.symbol, items: [], error: "News could not be read just now." };
+    } finally {
+      newsLoading = false;
+    }
+  }
+
+  const money = (n: number) => "₹" + n.toLocaleString("en-IN", { maximumFractionDigits: 2 });
+  const signed = (n: number | undefined) => (n === undefined ? "n/a" : `${n > 0 ? "+" : ""}${n.toFixed(2)}%`);
+  const tone = (n: number | undefined) => (n === undefined ? "" : n > 0 ? "up" : n < 0 ? "down" : "");
+  const crore = (n: number | undefined) => (n === undefined ? "n/a" : `₹${(n / 1e7).toLocaleString("en-IN", { maximumFractionDigits: 0 })} Cr`);
+
+  $effect(() => {
+    if (kind === "stocks") loadStocks();
+  });
 </script>
 
 <svelte:head><title>Invest Discovery · Verifin</title></svelte:head>
@@ -205,28 +259,98 @@
   {:else}
     <section class="card stocks">
       <div class="top">
-        <h2>Stocks</h2>
-        <span class="chip warn">Not available yet</span>
+        <h2>Top Indian stocks</h2>
+        {#if stocks?.asOf}<span class="chip">Prices as of {formatDate(stocks.asOf)}</span>{/if}
       </div>
-      <p>
-        Ranking stocks needs a steady supply of prices, profits and debt figures for every Indian company. We have not found a free source that gives it, so we are not
-        showing a stock ranking. We would rather show nothing than show numbers we cannot stand behind.
-      </p>
       <p class="muted small">
-        What we tested: Finnhub blocks Indian stocks on its free plan, Financial Modeling Prep wants payment, and Twelve Data's free plan covers only 1 of about 3,800 NSE stocks.
+        We look at the Nifty 50, India's 50 largest listed companies. Prices come from a free public feed and can be delayed, so use them to
+        discover companies, not to time a trade. Click a company for its latest news.
       </p>
-      <h3>What this section will show once there is a data source</h3>
-      <div class="grid cols-3 kindgrid">
-        {#each stockKinds as s}
-          <div class="preview">
-            <b>{s.label}</b>
-            <p class="muted small">{s.text}</p>
-            <span class="chip">Risk: {s.risk}</span>
-          </div>
-        {/each}
+
+      <div class="row">
+        <span class="lbl">List</span>
+        <div class="seg" role="group" aria-label="Which list">
+          {#each LISTS as l}
+            <button type="button" aria-pressed={list === l.id} onclick={() => { list = l.id; openStock = null; }}>{l.label}</button>
+          {/each}
+        </div>
+        <span class="muted small">{LISTS.find((l) => l.id === list)?.hint}</span>
       </div>
-      <p class="muted small">Each type would show the top 5 companies ranked by published rules (profit growth, debt, price compared with profit), with the reasons and the risks next to each one, the same way the fund rankings do.</p>
-      <button class="btn" type="button" onclick={() => (kind = "funds")}>See mutual funds instead</button>
+      {#if stocks}
+        <div class="row">
+          <span class="lbl">Industry</span>
+          <div class="seg" role="group" aria-label="Industry">
+            <button type="button" aria-pressed={sector === "all"} onclick={() => { sector = "all"; openStock = null; }}>All</button>
+            {#each sectors as sc}
+              <button type="button" aria-pressed={sector === sc} onclick={() => { sector = sc; openStock = null; }}>{sc}</button>
+            {/each}
+          </div>
+        </div>
+      {/if}
+
+      {#if stocksLoading}
+        <div><span class="spinner"></span> Reading today's prices for 50 companies. This takes a few seconds...</div>
+      {:else if stocksError}
+        <p class="notice bad" role="alert">{stocksError}</p>
+      {:else if stocks}
+        {#if !shown.length}
+          <p class="notice">No stock in this list right now. Try another list or industry.</p>
+        {:else}
+          <div class="scroll-x">
+            <table>
+              <thead><tr><th>#</th><th>Company</th><th>Price</th><th>Today</th><th>1 month</th><th>1 year</th><th>Traded today</th><th>Vs 52-week high</th></tr></thead>
+              <tbody>
+                {#each shown as s, i}
+                  <tr class="pick" class:sel={openStock?.symbol === s.symbol} onclick={() => toggleStock(s)}>
+                    <td><b>{i + 1}</b></td>
+                    <td>
+                      <button class="link" type="button" aria-expanded={openStock?.symbol === s.symbol}>{s.name}</button>
+                      <div class="muted small">{s.symbol} · {s.sector}</div>
+                    </td>
+                    <td>{money(s.price)}</td>
+                    <td class={tone(s.changePct)}><b>{signed(s.changePct)}</b></td>
+                    <td class={tone(s.return1m)}>{signed(s.return1m)}</td>
+                    <td class={tone(s.return1y)}>{signed(s.return1y)}</td>
+                    <td>{crore(s.turnover)}</td>
+                    <td>{s.nearHigh === undefined ? "n/a" : `${s.nearHigh.toFixed(0)}% of high`}</td>
+                  </tr>
+                  {#if openStock?.symbol === s.symbol}
+                    <tr class="detail">
+                      <td colspan="8">
+                        <h3>Latest news on {s.name}</h3>
+                        {#if newsLoading}
+                          <span class="spinner"></span> Finding recent stories...
+                        {:else if news?.error}
+                          <p class="muted">{news.error}</p>
+                        {:else if news && !news.items.length}
+                          <p class="muted">No recent stories found.</p>
+                        {:else if news}
+                          <ul class="newslist">
+                            {#each news.items as n}
+                              <li>
+                                <a href={n.url} target="_blank" rel="noopener noreferrer">{n.headline}</a>
+                                <span class="muted small">{n.source}{n.publishedAt ? ` · ${formatDate(n.publishedAt)}` : ""}</span>
+                              </li>
+                            {/each}
+                          </ul>
+                        {/if}
+                        <p class="muted small">
+                          52-week range: {s.low52 ? money(s.low52) : "n/a"} to {s.high52 ? money(s.high52) : "n/a"}. Past moves do not predict future ones.
+                        </p>
+                      </td>
+                    </tr>
+                  {/if}
+                {/each}
+              </tbody>
+            </table>
+          </div>
+          <p class="muted small">
+            Read {stocks.read} of {stocks.total} companies. Sources: Yahoo Finance public chart feed (prices) and Google News (headlines).
+            {#if stocks.notes?.length}{stocks.notes.join(" ")}{/if}
+          </p>
+        {/if}
+      {/if}
+      <button class="btn ghost" type="button" onclick={() => (kind = "funds")}>See mutual funds instead</button>
     </section>
   {/if}
 </div>
@@ -326,10 +450,12 @@
   tr.sel {
     background: var(--accent-soft);
   }
-  tr.row {
+  tr.row,
+  tr.pick {
     cursor: pointer;
   }
-  tr.row:hover {
+  tr.row:hover,
+  tr.pick:hover {
     background: var(--surface-soft);
   }
   .link {
@@ -357,19 +483,19 @@
     display: grid;
     gap: 14px;
   }
-  .kindgrid {
-    gap: 12px;
+  .up {
+    color: var(--good);
   }
-  .preview {
+  .down {
+    color: var(--bad);
+  }
+  .newslist {
+    margin: 6px 0 12px;
+    padding-left: 18px;
     display: grid;
     gap: 6px;
-    align-content: start;
-    padding: 14px;
-    border: 1px dashed var(--line);
-    border-radius: var(--radius-sm);
-    opacity: 0.85;
   }
-  .preview p {
-    margin: 0;
+  .newslist li {
+    display: grid;
   }
 </style>

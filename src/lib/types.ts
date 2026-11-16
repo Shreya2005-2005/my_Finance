@@ -216,7 +216,7 @@ export interface AskResponse {
   /** A plain-words message, for example when the AI helper was busy. */
   note?: string;
   /** The company found in SEC records. */
-  record?: { name: string; ticker?: string; how: "exact" | "ticker" | "close"; filingsUrl: string; alternatives: string[] };
+  record?: { name: string; ticker?: string; how: "exact" | "ticker" | "close"; filingsUrl: string; alternatives: string[]; /** Where the figures were read: the US SEC (default) or Yahoo Finance for Indian companies. */ source?: "sec" | "yahoo" };
   answer?: Answer;
   /** Figures found in the sentence, used to mark news that mentions them. */
   claimNumbers?: Array<{ raw: string; value: number; isPercent: boolean }>;
@@ -235,5 +235,42 @@ export interface DailyNewsResponse {
   fetchedAt: number;
   /** Plain-words remarks, for example a news source that could not be read just now. */
   notes?: string[];
+  error?: string;
+}
+
+// ---------- stocks ----------
+export interface StockRow {
+  symbol: string;
+  name: string;
+  sector: string;
+  price: number;
+  changePct: number;
+  volume?: number;
+  /** Rupees traded today (price x volume): how we rank "most active". */
+  turnover?: number;
+  high52?: number;
+  low52?: number;
+  /** How close the price is to its 52-week high, in percent (100 = at the high). */
+  nearHigh?: number;
+  return1m?: number;
+  return1y?: number;
+}
+export interface StocksResponse {
+  gainers: StockRow[];
+  losers: StockRow[];
+  active: StockRow[];
+  /** Every stock we could read, for the sector view and search. */
+  all: StockRow[];
+  asOf?: number;
+  fetchedAt: number;
+  /** How many of the 50 could be read. */
+  read: number;
+  total: number;
+  notes?: string[];
+  error?: string;
+}
+export interface StockNewsResponse {
+  symbol: string;
+  items: Array<{ headline: string; source: string; url: string; publishedAt?: number }>;
   error?: string;
 }
