@@ -43,6 +43,12 @@ const RULES: Rule[] = [
   { id: "tata", test: /\btata\b/i, queries: ["Tata Motors", "Tata Motors factory"] },
   { id: "reliance", test: /reliance/i, queries: ["Reliance Industries", "Jamnagar refinery"] },
   { id: "infosys", test: /infosys/i, queries: ["Infosys campus", "Infosys Bangalore"] },
+  { id: "sbi", test: /\bsbi\b|state bank of india/i, queries: ["State Bank of India headquarters Mumbai", "State Bank of India branch"] },
+  { id: "hdfc", test: /hdfc/i, queries: ["HDFC Bank branch", "HDFC Bank"] },
+  { id: "icici", test: /icici/i, queries: ["ICICI Bank branch", "ICICI Bank"] },
+  { id: "adani", test: /adani/i, queries: ["Adani Group", "Mundra port"] },
+  { id: "lic", test: /\blic\b|life insurance corporation/i, queries: ["Life Insurance Corporation of India", "LIC building Mumbai"] },
+  { id: "sebi", test: /\bsebi\b|securities and exchange board of india/i, queries: ["Securities and Exchange Board of India", "SEBI Bhavan Mumbai"] },
 
   // ---- broad subjects ----
   { id: "india-market", test: /nifty|sensex|\bbse\b|\bnse\b|dalal street/i, queries: ["Bombay Stock Exchange building", "Dalal Street Mumbai"] },
@@ -70,7 +76,17 @@ const RULES: Rule[] = [
 
 const FALLBACK: Topic = { id: "finance", queries: ["financial district skyline", "business district skyline", "skyscrapers"] };
 
-export function topicFor(headline: string): Topic {
-  for (const r of RULES) if (r.test.test(headline)) return { id: r.id, queries: r.queries };
-  return FALLBACK;
+const INDIA_MARKET = RULES.find((r) => r.id === "india-market")!;
+
+/**
+ * `region` says where the story is from. For an Indian story, a plain "stock market" or unknown subject gets an Indian
+ * market photo (the Bombay Stock Exchange), not the New York Stock Exchange.
+ */
+export function topicFor(headline: string, region?: "india"): Topic {
+  for (const r of RULES) {
+    if (!r.test.test(headline)) continue;
+    if (region === "india" && r.id === "stocks") return { id: INDIA_MARKET.id, queries: INDIA_MARKET.queries };
+    return { id: r.id, queries: r.queries };
+  }
+  return region === "india" ? { id: INDIA_MARKET.id, queries: INDIA_MARKET.queries } : FALLBACK;
 }

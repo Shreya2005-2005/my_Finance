@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
+  import IndiaNews from "$lib/components/IndiaNews.svelte";
   import { bestQuoteFor, relatedStories } from "$engine/claims/related.ts";
   import { approxEqual, extractNumbers } from "$engine/lib/numbers.ts";
   import { eventLabel, formatDate, timeAgo, tierLabel, tierTone } from "$lib/format";
@@ -304,10 +305,10 @@
 
 <div class="wrap page">
   <header class="head">
-    <p class="eyebrow">Verifin Research</p>
     <h1>Research any company</h1>
-    <p class="muted lead">Type a company name for a briefing, ask a question like “Oracle last year profit”, or paste a claim you saw, like “Oracle had a profit of 50%”, to check it against the company's official figures.</p>
   </header>
+
+  <IndiaNews />
 
   <form class="card form" onsubmit={(e) => { e.preventDefault(); submit(); }}>
     <label class="field grow">
@@ -387,9 +388,14 @@
 
       {#if a.period && ask.record}
         <p class="source small">
-          <b>Source:</b> {ask.record.name}{ask.record.ticker ? " (" + ask.record.ticker + ")" : ""} annual report (Form 10-K), filed {a.period.filedOn} with the US SEC.
-          <a href={a.period.url} target="_blank" rel="noopener noreferrer">Open the filing ↗</a> ·
-          <a href={ask.record.filingsUrl} target="_blank" rel="noopener noreferrer">All annual reports ↗</a>
+          {#if ask.record.source === "yahoo"}
+            <b>Source:</b> {ask.record.name}{ask.record.ticker ? " (" + ask.record.ticker + ")" : ""} yearly results as published by Yahoo Finance (year ended {a.period.filedOn}). This is a data service, not the company's filing.
+            <a href={a.period.url} target="_blank" rel="noopener noreferrer">Open the source ↗</a>
+          {:else}
+            <b>Source:</b> {ask.record.name}{ask.record.ticker ? " (" + ask.record.ticker + ")" : ""} annual report (Form 10-K), filed {a.period.filedOn} with the US SEC.
+            <a href={a.period.url} target="_blank" rel="noopener noreferrer">Open the filing ↗</a> ·
+            <a href={ask.record.filingsUrl} target="_blank" rel="noopener noreferrer">All annual reports ↗</a>
+          {/if}
         </p>
         {#if ask.record.how === "close"}
           <p class="muted small">We matched “{ask.company}” to {ask.record.name}. If you meant a different company, type its full name.</p>
@@ -734,8 +740,14 @@
     display: grid;
     gap: 8px;
   }
-  .lead {
-    max-width: 660px;
+  /* The page title uses the logo's style, like the home page headline: thin, capital, widely spaced letters. */
+  h1 {
+    font-family: var(--font-brand);
+    font-weight: 300;
+    text-transform: uppercase;
+    font-size: clamp(1.7rem, 3.8vw, 3rem);
+    letter-spacing: 0.12em;
+    line-height: 1.25;
   }
   .small {
     font-size: 0.85rem;

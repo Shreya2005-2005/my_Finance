@@ -20,6 +20,12 @@ import { isFinancial } from "./financial.ts";
 
 export const DAILY_NEWS = { min: 5, max: 10, windowsHours: [24, 48, 72] } as const;
 
+/**
+ * One story coming in, from any source (Finnhub, an Indian outlet's feed ...).
+ * `official` marks a regulator's own notice (RBI, SEBI): it was already chosen as worth showing, so it skips the word check.
+ */
+export type NewsInput = MarketNewsItem & { official?: boolean };
+
 export interface DailyNewsItem {
   headline: string;
   source: string;
@@ -29,6 +35,10 @@ export interface DailyNewsItem {
   summary?: string;
   /** A real picture of the story, when the feed has one. */
   image?: string;
+  /** True for a regulator's own notice (RBI, SEBI). */
+  official?: boolean;
+  /** Where the story is from, so its photo fits (an Indian market story gets an Indian photo). */
+  region?: "india";
   /** Other outlets that reported the same event. */
   alsoBy: string[];
 }
@@ -64,13 +74,32 @@ export function usefulSummary(summary: string | undefined, headline: string): st
   return s.length > 280 ? `${s.slice(0, 280).trimEnd()}…` : s;
 }
 
-export function pickDailyNews(raw: MarketNewsItem[], now: number): DailyNews {
+/**
+ * Keeps one outlet from filling the whole list: at most `cap` stories from each, newest first. If that leaves too few
+ * stories, the ones that were set aside come back, so a quiet day is never padded with nothing.
+ */
+export function limitPerSource(items: DailyNewsItem[], cap: number): DailyNewsItem[] {
+  const count = new Map<string, number>();
+  const kept: DailyNewsItem[] = [];
+  const aside: DailyNewsItem[] = [];
+  for (const it of items) {
+    const c = count.get(it.source) ?? 0;
+    if (c < cap) {
+      kept.push(it);
+      count.set(it.source, c + 1);
+    } else aside.push(it);
+  }
+  const out = kept.length >= DAILY_NEWS.max ? kept : [...kept, ...aside.slice(0, DAILY_NEWS.max - kept.length)];
+  return out.sort((a, b) => b.publishedAt - a.publishedAt);
+}
+
+export function pickDailyNews(raw: NewsInput[], now: number, opts: { maxPerSource?: number } = {}): DailyNews {
   // A picture used by more than one story is an outlet's logo, not a photo of the story, so it is dropped.
   const uses = new Map<string, number>();
   for (const n of raw) if (n.image) uses.set(n.image, (uses.get(n.image) ?? 0) + 1);
   const fresh = raw
     .filter((n) => n.publishedAt <= now + 5 * 60_000) // a clock that runs a little ahead is fine; the future is not
-    .filter((n) => isFinancial(cleanHeadline(n.headline, n.source), n.summary)) // money news only
+    .filter((n) => n.official || isFinancial(cleanHeadline(n.headline, n.source), n.summary)) // money news only
     .map((n) => (n.image && (uses.get(n.image) ?? 0) > 1 ? { ...n, image: undefined } : n));
   let chosen: DailyNewsItem[] = [];
   let used: number = DAILY_NEWS.windowsHours[0];
@@ -80,17 +109,18 @@ export function pickDailyNews(raw: MarketNewsItem[], now: number): DailyNews {
     chosen = group(inWindow, now);
     if (chosen.length >= DAILY_NEWS.min) break;
   }
-  return { items: chosen.slice(0, DAILY_NEWS.max), windowHours: used };
+  const items = opts.maxPerSource ? limitPerSource(chosen, opts.maxPerSource) : chosen;
+  return { items: items.slice(0, DAILY_NEWS.max), windowHours: used };
 }
 
-function group(items: MarketNewsItem[], now: number): DailyNewsItem[] {
+function group(items: NewsInput[], now: number): DailyNewsItem[] {
   if (!items.length) return [];
   const cleaned = items.map((n) => {
     const title = cleanHeadline(n.headline, n.source);
     return { n, title, summary: usefulSummary(n.summary, title) };
   });
   const stories = buildStories(
-    cleaned.map((c) => ({ title: c.title, text: c.summary, publisher: c.n.source, tier: classifyPublisher(c.n.source), weak: false, publishedAt: c.n.publishedAt, url: c.n.url, image: c.n.image })),
+    cleaned.map((c) => ({ title: c.title, text: c.summary, publisher: c.n.source, tier: classifyPublisher(c.n.source), weak: false, publishedAt: c.n.publishedAt, url: c.n.url, image: c.n.image, official: c.n.official })),
     { companyWords: [], now },
   );
   const out: DailyNewsItem[] = stories.map((s) => {
@@ -105,6 +135,7 @@ function group(items: MarketNewsItem[], now: number): DailyNewsItem[] {
       summary: latest.text,
       // The newest report's picture, or any other outlet's picture of the same event.
       image: latest.image ?? s.items.find((i) => i.image)?.image,
+      official: s.items.some((i) => i.official) || undefined,
       alsoBy: others,
     };
   });

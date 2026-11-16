@@ -157,9 +157,17 @@ const monthYear = (iso: string) => `${MONTHS[Number(iso.slice(5, 7)) - 1]!.slice
 
 const commas = (n: number, digits = 0) => n.toLocaleString("en-US", { minimumFractionDigits: digits, maximumFractionDigits: digits });
 
-export function formatMoney(v: number, perShare = false): string {
+export function formatMoney(v: number, perShare = false, currency: "USD" | "INR" = "USD"): string {
   const sign = v < 0 ? "-" : "";
   const a = Math.abs(v);
+  if (currency === "INR") {
+    // Indian style: crore (10 million) and lakh crore (1 trillion).
+    if (perShare) return `${sign}₹${a.toFixed(2)} per share`;
+    const inr = (n: number, d: number) => n.toLocaleString("en-IN", { minimumFractionDigits: d, maximumFractionDigits: d });
+    if (a >= 1e12) return `${sign}₹${inr(a / 1e12, 2)} lakh crore`;
+    if (a >= 1e7) return `${sign}₹${inr(a / 1e7, a >= 1e9 ? 0 : 2)} crore`;
+    return `${sign}₹${inr(a, 0)}`;
+  }
   if (perShare) return `${sign}$${a.toFixed(2)} per share`;
   if (a >= 1e12) return `${sign}$${(a / 1e12).toFixed(2)} trillion`;
   if (a >= 1e9) return `${sign}$${(a / 1e9).toFixed(2)} billion`;
@@ -194,7 +202,7 @@ function buildTable(fin: CompanyFinancials): Answer["table"] {
   const rows: Array<{ label: string; cells: string[] }> = [];
   for (const m of FLOW_METRICS) {
     if (!fin.figures[m].length) continue;
-    const cells = ends.map((e) => (at(m, e) ? formatMoney(at(m, e)!.value, isPerShare(m)) : "–"));
+    const cells = ends.map((e) => (at(m, e) ? formatMoney(at(m, e)!.value, isPerShare(m), fin.currency) : "–"));
     if (cells.every((c) => c === "–")) continue; // nothing filed for these years (for example Oracle has no gross profit line)
     rows.push({ label: SHORT_NAMES[m][0]!.toUpperCase() + SHORT_NAMES[m].slice(1), cells });
   }
@@ -219,7 +227,14 @@ function buildTable(fin: CompanyFinancials): Answer["table"] {
 }
 
 export function evaluateAnswer(parsed: ParsedQuery, text: string, fin: CompanyFinancials): Answer {
-  const notes: string[] = ["Figures come from the company's annual report (Form 10-K) filed with the US SEC. No AI wrote or changed any number."];
+  const cur = fin.currency ?? "USD";
+  const rupees = cur === "INR";
+  const viaData = fin.sourceName !== undefined;
+  const notes: string[] = [
+    viaData
+      ? `Figures are the company's yearly results as published by ${fin.sourceName ?? "the data source"}, in ${rupees ? "rupees" : "US dollars"}. They are not read from the filing itself, so open the source link to confirm. No AI wrote or changed any number.`
+      : "Figures come from the company's annual report (Form 10-K) filed with the US SEC. No AI wrote or changed any number.",
+  ];
   const who = parsed.company || titleCase(fin.name);
   const table = buildTable(fin);
 
@@ -227,7 +242,7 @@ export function evaluateAnswer(parsed: ParsedQuery, text: string, fin: CompanyFi
     return {
       status: "not_covered",
       headline: "That is not one of the figures we can check yet.",
-      details: [`We can check yearly revenue, net income, operating income, gross profit, earnings per share and cash from operations for US-listed companies.`],
+      details: [`We can check yearly revenue, net income, operating income, gross profit, earnings per share and cash from operations for US-listed and Indian listed companies.`],
       checks: [],
       table,
       notes,
@@ -240,8 +255,8 @@ export function evaluateAnswer(parsed: ParsedQuery, text: string, fin: CompanyFi
   if (!figs.length) {
     return {
       status: "no_data",
-      headline: `The SEC records for ${titleCase(fin.name)} have no yearly ${SHORT_NAMES[metric]}.`,
-      details: ["Companies that file the foreign-company form (20-F or 40-F) are not read yet."],
+      headline: viaData ? `${titleCase(fin.name)} has no yearly ${SHORT_NAMES[metric]} in ${fin.sourceName}.` : `The SEC records for ${titleCase(fin.name)} have no yearly ${SHORT_NAMES[metric]}.`,
+      details: [viaData ? "Banks and some other companies do not report this line in the same way." : "Companies that file the foreign-company form (20-F or 40-F) are not read yet."],
       checks: [],
       table,
       notes,
@@ -253,7 +268,7 @@ export function evaluateAnswer(parsed: ParsedQuery, text: string, fin: CompanyFi
     const years = [...new Set(figs.map((f) => f.end.slice(0, 4)))].join(", ");
     return {
       status: "no_period",
-      headline: `${titleCase(fin.name)} has no yearly ${SHORT_NAMES[metric]} for ${parsed.year} in its SEC annual reports.`,
+      headline: `${titleCase(fin.name)} has no yearly ${SHORT_NAMES[metric]} for ${parsed.year} in ${viaData ? fin.sourceName : "its SEC annual reports"}.`,
       details: [`Years available: ${years}.`],
       checks: [],
       table,
@@ -266,11 +281,11 @@ export function evaluateAnswer(parsed: ParsedQuery, text: string, fin: CompanyFi
   const revenue = fin.figures.revenue.find((f) => f.end === fig.end);
   const margin = metric !== "revenue" && metric !== "eps" && metric !== "operating_cash_flow" && revenue ? marginPercent(fig.value, revenue.value) : undefined;
   const periodLabel = `the year ended ${dateLabel(fig.end)}`;
-  const official = formatMoney(fig.value, isPerShare(metric));
+  const official = formatMoney(fig.value, isPerShare(metric), cur);
 
   // The official sentence, built only from the numbers above.
   let sentence = `${who}'s ${SHORT_NAMES[metric]} for ${periodLabel} was ${official}`;
-  if (prior && growth !== undefined) sentence += `, ${growth >= 0 ? "up" : "down"} ${pct(Math.abs(growth))} from ${formatMoney(prior.value, isPerShare(metric))} the year before`;
+  if (prior && growth !== undefined) sentence += `, ${growth >= 0 ? "up" : "down"} ${pct(Math.abs(growth))} from ${formatMoney(prior.value, isPerShare(metric), cur)} the year before`;
   if (margin !== undefined) sentence += `, and ${pct(margin)} of its revenue`;
   sentence += ".";
 
@@ -320,8 +335,9 @@ export function evaluateAnswer(parsed: ParsedQuery, text: string, fin: CompanyFi
         });
       }
     } else {
-      if (n.currency === "inr" || n.currency === "other") {
-        checks.push({ label: "Amount", claimed: n.raw, official, fit: "info", note: "Your figure is not in US dollars and the official figure is. We do not convert, because that would mean guessing an exchange rate." });
+      const wrongCurrency = rupees ? n.currency === "usd" || n.currency === "other" : n.currency === "inr" || n.currency === "other";
+      if (wrongCurrency) {
+        checks.push({ label: "Amount", claimed: n.raw, official, fit: "info", note: `Your figure is not in ${rupees ? "rupees" : "US dollars"} and the official figure is. We do not convert, because that would mean guessing an exchange rate.` });
         continue;
       }
       checks.push({
@@ -329,7 +345,7 @@ export function evaluateAnswer(parsed: ParsedQuery, text: string, fin: CompanyFi
         claimed: n.raw,
         official,
         fit: compareAmount(n, fig.value),
-        note: n.currency === "none" ? "No currency was written, so US dollars were assumed." : undefined,
+        note: n.currency === "none" ? `No currency was written, so ${rupees ? "rupees were" : "US dollars were"} assumed.` : undefined,
       });
     }
   }

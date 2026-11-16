@@ -70,6 +70,10 @@ export interface CompanyFinancials {
   ticker?: string;
   /** Link to the company's annual-report list on sec.gov. */
   filingsUrl: string;
+  /** Currency of every amount. US SEC figures are dollars (the default); Indian figures are rupees. */
+  currency?: "USD" | "INR";
+  /** Where the figures were read, for the notes line. Default: the US SEC. */
+  sourceName?: string;
   /** Oldest first. */
   figures: Record<FlowMetric, FlowFigure[]>;
 }

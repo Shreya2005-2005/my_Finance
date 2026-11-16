@@ -7,7 +7,8 @@
    *   3. otherwise a plain dark panel with the outlet's name (no decoration pretending to be a photo).
    */
   type Topic = { url: string; credit: string; license: string; pageUrl: string; title: string };
-  let { source, image, photo, small = false }: { source: string; image?: string; photo?: Topic; small?: boolean } = $props();
+  // `bare` shows only the picture: the page draws its own label and credit on top (used by the Indian news slider).
+  let { source, image, photo, small = false, compact = false, bare = false }: { source: string; image?: string; photo?: Topic; small?: boolean; compact?: boolean; bare?: boolean } = $props();
 
   let imageBroken = $state(false);
   let photoBroken = $state(false);
@@ -15,19 +16,19 @@
   const showTopic = $derived(!showReal && Boolean(photo) && !photoBroken);
 </script>
 
-<div class="art" class:small>
+<div class="art" class:small class:compact>
   {#if showReal}
     <img src={image} alt="" loading="lazy" referrerpolicy="no-referrer" onerror={() => (imageBroken = true)} />
   {:else if showTopic && photo}
     <img src={photo.url} alt="" loading="lazy" referrerpolicy="no-referrer" onerror={() => (photoBroken = true)} />
-    {#if !small}
+    {#if !small && !bare}
       <span class="tag">Illustration</span>
       <p class="credit">
         Photo: {photo.credit}, {photo.license},
         <a href={photo.pageUrl} target="_blank" rel="noopener noreferrer">Wikimedia Commons</a>
       </p>
     {/if}
-  {:else if !small}
+  {:else if !small && !bare}
     <span class="outlet">{source}</span>
   {/if}
 </div>
@@ -76,6 +77,24 @@
   .credit a {
     color: #fff;
     text-underline-offset: 2px;
+  }
+  .compact .tag {
+    top: 8px;
+    left: 8px;
+    padding: 2px 8px;
+    font-size: 0.6rem;
+  }
+  .compact .credit {
+    padding: 4px 8px;
+    font-size: 0.6rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .compact .outlet {
+    left: 14px;
+    bottom: 12px;
+    font-size: 1.2rem;
   }
   .outlet {
     position: absolute;

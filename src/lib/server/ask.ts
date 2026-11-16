@@ -5,15 +5,18 @@
  *   2. For US-listed companies, find the company in SEC records and read its yearly figures.
  *   3. Plain code compares and decides. The answer shows the official number, the period and a link to the filing.
  *
- * Indian companies cannot be checked against official filings yet (BSE blocks automated access), and we say so.
+ * Indian companies (NSE/BSE) are checked against yearly results from Yahoo Finance, in rupees. These are NOT read from the
+ * filing itself (BSE blocks automated access), and the answer says so.
  */
 import { CACHE_TTL_MS } from "$config/engine.ts";
 import { claimNumbers, evaluateAnswer } from "$engine/claims/evaluate.ts";
 import { keywordsOf, TOPIC_WORDS } from "$engine/claims/related.ts";
 import { understandQuery } from "$engine/claims/understand.ts";
 import { loadCompanyList, loadFinancials, matchCompany, normalizeName, type CompanyFinancials, type SecCompany } from "$engine/providers/sec.ts";
+import type { ParsedQuery } from "$engine/claims/understand.ts";
 import type { ProviderError, Result } from "$engine/providers/types.ts";
 import { withRetry } from "$engine/lib/resilience.ts";
+import { loadIndianFinancials, searchIndianCompany, type IndianListing } from "$engine/providers/yahoo.ts";
 import type { AskResponse } from "$lib/types";
 import { cached, forget, providerContext } from "./context";
 
@@ -30,6 +33,34 @@ const why = (e: ProviderError) =>
   e.kind === "AUTH" ? "The SEC refused the request. Set SEC_USER_AGENT in .env.local to your name and email." :
   e.kind === "SCHEMA_DRIFT" ? "The SEC changed its data format, so it could not be read." :
   `The SEC is not reachable right now (${e.message}).`;
+
+/**
+ * Looks the company up among NSE/BSE listings and reads its yearly rupee figures.
+ * Returns the finished answer, or the plain-words reason it could not be done.
+ */
+async function indianAnswer(base: AskResponse, parsed: ParsedQuery, query: string): Promise<{ response: AskResponse } | { reason: string }> {
+  const ctx = providerContext();
+  const found = await cachedOk<IndianListing[]>(`yahoo:search:${normalizeName(parsed.company)}`, CACHE_TTL_MS.statements, () => withRetry(() => searchIndianCompany(parsed.company, ctx)));
+  if (!found.ok) return { reason: "The Indian company data source is not reachable right now. Try again in a minute." };
+  const listing = found.value[0];
+  if (!listing) return { reason: `We could not find "${parsed.company}" among companies listed on the NSE or BSE.` };
+  const fin = await cachedOk<CompanyFinancials>(`yahoo:facts:${listing.symbol}`, CACHE_TTL_MS.statements, () => withRetry(() => loadIndianFinancials(listing, ctx)));
+  if (!fin.ok) return { reason: `We found ${listing.name} (${listing.symbol}) but could not read its yearly figures from the free data source.` };
+  return {
+    response: {
+      ...base,
+      record: {
+        name: fin.value.name,
+        ticker: listing.symbol,
+        how: normalizeName(listing.name) === normalizeName(parsed.company) ? "exact" : "close",
+        filingsUrl: fin.value.filingsUrl,
+        alternatives: found.value.slice(1, 4).map((l) => l.name),
+        source: "yahoo",
+      },
+      answer: evaluateAnswer(parsed, query, fin.value),
+    },
+  };
+}
 
 export async function ask(query: string): Promise<AskResponse> {
   const ctx = providerContext();
@@ -69,22 +100,20 @@ export async function ask(query: string): Promise<AskResponse> {
     };
   }
 
-  // An Indian listing: official filings are not available to us.
-  if (parsed.listedIn === "india" || parsed.listedIn === "other") {
+  // An Indian listing, or a figure written in rupees: read the yearly results of the NSE/BSE company.
+  if (parsed.listedIn === "india" || numbers.some((n) => n.currency === "inr")) {
+    const r = await indianAnswer(base, parsed, query);
+    if ("response" in r) return r.response;
     return {
       ...base,
-      unavailable: {
-        reason: `${parsed.company} is not a US-listed company, so we cannot check it against official filings yet. Indian filings from BSE block automated access, and we will not get around that. The news below is the best evidence we have, and stories that mention your figure are marked.`,
-      },
+      unavailable: { reason: `${r.reason} Official Indian filings from BSE block automated access, and we will not get around that. The news below is the best evidence we have, and stories that mention your figure are marked.` },
     };
   }
-
-  // A rupee figure about a company that reports in dollars: do not convert, and warn that the figure may belong to a different company.
-  if (numbers.some((n) => n.currency === "inr")) {
+  if (parsed.listedIn === "other") {
     return {
       ...base,
       unavailable: {
-        reason: `Your figure is in rupees (₹), but ${parsed.company} reports to the US SEC in dollars, and we do not convert currencies because that would mean guessing an exchange rate. If you meant an India-listed company with a similar name, we cannot check it against official filings yet, because BSE blocks automated access. Stories below that mention your figure are marked. Read each headline: a marked story can be about a different company with a similar name.`,
+        reason: `${parsed.company} is not listed in the US or India, so we cannot check it against official figures yet. The news below is the best evidence we have, and stories that mention your figure are marked.`,
       },
     };
   }
@@ -94,10 +123,13 @@ export async function ask(query: string): Promise<AskResponse> {
 
   const match = matchCompany(list.value, parsed.company);
   if (!match) {
+    // Not a US company: it may be an Indian one the AI could not place.
+    const r = await indianAnswer(base, parsed, query);
+    if ("response" in r) return r.response;
     return {
       ...base,
       unavailable: {
-        reason: `We could not find "${parsed.company}" among US-listed companies in SEC records, so there is no official figure to check against. If it is a US company, try its full name. The news below is the best evidence we have.`,
+        reason: `We could not find "${parsed.company}" among US-listed companies in SEC records or among companies listed on the NSE or BSE, so there is no official figure to check against. Try its full name. The news below is the best evidence we have.`,
       },
     };
   }

@@ -119,7 +119,6 @@
 
 <div class="wrap page">
   <header class="head">
-    <p class="eyebrow">Verifin Watch</p>
     <h1>Your top 5 alerts</h1>
     <p class="muted lead">
       For each company you follow, we pick the <b>5 most important</b> recent stories. Repeated stories are merged, so one event is one alert.
@@ -209,6 +208,15 @@
   .head {
     display: grid;
     gap: 8px;
+  }
+  /* The page title uses the logo's style, like the home page headline: thin, capital, widely spaced letters. */
+  h1 {
+    font-family: var(--font-brand);
+    font-weight: 300;
+    text-transform: uppercase;
+    font-size: clamp(1.7rem, 3.8vw, 3rem);
+    letter-spacing: 0.12em;
+    line-height: 1.25;
   }
   .lead {
     max-width: 620px;
