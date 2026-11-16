@@ -388,9 +388,14 @@
 
       {#if a.period && ask.record}
         <p class="source small">
-          <b>Source:</b> {ask.record.name}{ask.record.ticker ? " (" + ask.record.ticker + ")" : ""} annual report (Form 10-K), filed {a.period.filedOn} with the US SEC.
-          <a href={a.period.url} target="_blank" rel="noopener noreferrer">Open the filing ↗</a> ·
-          <a href={ask.record.filingsUrl} target="_blank" rel="noopener noreferrer">All annual reports ↗</a>
+          {#if ask.record.source === "yahoo"}
+            <b>Source:</b> {ask.record.name}{ask.record.ticker ? " (" + ask.record.ticker + ")" : ""} yearly results as published by Yahoo Finance (year ended {a.period.filedOn}). This is a data service, not the company's filing.
+            <a href={a.period.url} target="_blank" rel="noopener noreferrer">Open the source ↗</a>
+          {:else}
+            <b>Source:</b> {ask.record.name}{ask.record.ticker ? " (" + ask.record.ticker + ")" : ""} annual report (Form 10-K), filed {a.period.filedOn} with the US SEC.
+            <a href={a.period.url} target="_blank" rel="noopener noreferrer">Open the filing ↗</a> ·
+            <a href={ask.record.filingsUrl} target="_blank" rel="noopener noreferrer">All annual reports ↗</a>
+          {/if}
         </p>
         {#if ask.record.how === "close"}
           <p class="muted small">We matched “{ask.company}” to {ask.record.name}. If you meant a different company, type its full name.</p>
