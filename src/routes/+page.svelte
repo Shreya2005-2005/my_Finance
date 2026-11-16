@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
+  import FlowBackground from "$lib/components/FlowBackground.svelte";
 
   // The flowing colour is animated inside the SVG filter. CSS cannot switch that off, so for visitors who asked
   // their system for reduced motion the animation element is removed here.
@@ -19,13 +20,16 @@
   <meta name="description" content="Financial research where every claim is checked against its source." />
 </svelte:head>
 
-<section class="hero wrap">
-  <h1>Every claim,<br />checked against its source.</h1>
-  <p class="lead">
-    Your trust is what our research is built on.<br />
-    Every answer shows where it came from, so you can check it yourself.
-  </p>
-</section>
+<div class="band">
+  <FlowBackground />
+  <section class="hero wrap">
+    <h1>Every claim,<br />checked against its source.</h1>
+    <p class="lead">
+      Your trust is what our research is built on.<br />
+      Every answer shows where it came from, so you can check it yourself.
+    </p>
+  </section>
+</div>
 
 <section class="wrap block">
   <h2>Three tools, one engine</h2>
@@ -59,7 +63,14 @@
 
 <style>
   /* The first screen holds only the headline. The tools section starts below it, so it appears on scroll. */
+  /* the full-width strip that holds the flowing background and the headline above it */
+  .band {
+    position: relative;
+    overflow: hidden;
+  }
   .hero {
+    position: relative;
+    z-index: 1;
     text-align: center;
     min-height: calc(100svh - 74px); /* the full screen minus the header */
     display: flex;
