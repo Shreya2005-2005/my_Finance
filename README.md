@@ -1,76 +1,82 @@
 # Verifin
 
-Agentic financial research where **every claim is checked against its source**.
+**Every claim, checked against its source.**
 
-One shared engine powers three features:
+Verifin is a financial research website for India (and the US). Ask about a company and it shows
+what it found, where each fact came from, and what it could not confirm. It would rather say
+"can't confirm" than guess.
 
-| Feature | What the user gets |
+**Live site:** https://my-finance-peach-six.vercel.app
+
+## What you can do
+
+| Page | What it does |
 |---|---|
-| **Research** | A company report. Each fact is tagged *Verified* or *Unverified*, disagreeing sources are flagged, and each claim has a trust score. |
-| **Watch** | A watchlist that checks news and announcements on a schedule and emails only the important, de-duplicated events. |
-| **Invest Discovery** | Stocks and mutual funds (for SIP) ranked by clear, published rules, with sources and risks. |
+| **Daily news** | Today's top world and Indian market stories, gathered from many outlets. |
+| **Research** | Type a company, a question ("Reliance profit 2025") or a claim ("TCS revenue was 2.5 lakh crore"). Verifin finds the official figure, compares it, and says **Correct**, **Close**, **Not correct** or **Can't confirm**, with a link to the source. |
+| **Watch** | Follow companies and see the important news and announcements, with duplicate stories merged. |
+| **Invest** | Top Indian stocks (Nifty 50 gainers, losers, most traded, with news per company) and mutual funds ranked by published rules, with the risks shown next to each one. |
 
-Rule of the project: **AI reads and explains. Normal code does the math, ranking, checking and de-duplication.**
+## The one rule
 
-Full design: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+> **AI reads and explains. Plain code does the maths, the checking and the ranking.**
 
-## What is in each folder
+The AI never sees the official numbers and never decides a verdict. Every number on the page comes
+from a data source, and the page names that source.
 
-```
-src/                     the website (SvelteKit): pages in src/routes, server code in src/lib/server
-convex/                  the backend
-  schema.ts              the database: every table, explained in plain comments
-  config/engine.ts       all tunable numbers (scoring weights, limits, ranking rules)
-  engine/enums.ts        every allowed status / verdict / type, listed once
-  engine/providers/      the contract every data source (GDELT, Finnhub...) must follow
-tests/                   automated tests
-scripts/spike/           small scripts that test whether each data source really works
-docs/                    architecture and design documents
-```
+## Where the data comes from (all free)
 
-## Commands
+| Data | Source |
+|---|---|
+| US company figures | SEC EDGAR |
+| Indian company figures and stock prices | Yahoo Finance public feed |
+| News | Google News, Indian business RSS feeds, GDELT |
+| Mutual fund prices | MFapi.in |
+| Question understanding | Google Gemini |
+
+Prices can be delayed. Indian figures come from a data service, not the company's own filing, and
+the page says so.
+
+## Run it on your computer
 
 ```bash
-npm install          # install the tools (once)
-npm run dev          # start the website at http://localhost:5173
-npm run typecheck    # catch mistakes in the code
-npm test             # run the automated tests
-npm run spike:mfapi  # test the mutual-fund data source
-npm run spike:gdelt  # test the news data source
-npm run spike:finnhub  # test Finnhub (needs a key in .env.local)
+npm install
+npm run dev
 ```
 
-## Secrets
+Open http://localhost:5173.
 
-Real API keys never go in git. Copy the names from `.env.example` into `.env.local` (for local scripts)
-and into the Convex dashboard (for the deployed backend).
+Copy the names from `.env.example` into a file called `.env.local` and add your own keys
+(Gemini, Firecrawl, Finnhub). Never commit real keys.
 
-## Progress
+## Useful commands
 
-Built and tested as plain code (works without any login or key):
+```bash
+npm test             # run the automated tests
+npm run typecheck    # catch mistakes in the code
+npm run build        # make the production version
+```
 
-- [x] **Foundation:** project setup, database design (27 tables), settings file, provider contract
-- [x] **Data sources:** Google News, MFapi, GDELT, Finnhub adapters with error handling, retry, circuit breaker and rate limiter
-- [x] **Citation verification:** code check (quote, numbers, units, years, company) and the final verdict rule
-- [x] **Conflict flagging:** same-metric comparison across independent sources, rounding tolerance, preferred side
-- [x] **Confidence score:** formula with authority, corroboration, recency, verification and conflict penalty
-- [x] **Follow-up research logic** and **report guard** (drops uncited or mismatched sentences)
-- [x] **Gemini client and prompts** (injection-safe wrapping, strict JSON answers)
-- [x] **Watch logic:** event type, importance, 3-level duplicate merge, alert planning
-- [x] **Invest logic:** returns, risk, SIP return, deterministic ranking with reasons and risk flags
-- [x] **Claims and questions:** one search box takes a name, a question ("Oracle last year profit") or a claim ("Oracle had a profit of 50%"); Gemini labels the sentence, plain code compares it with official yearly figures from the SEC (US companies) and gives a verdict
-- [x] **Indian market news:** the top 5 to 10 Indian finance stories on the Research page, from free public feeds (Economic Times, Mint, Business Standard, BusinessLine, RBI, SEBI), with each outlet's own photo
-- [x] **Tests:** 422 automated tests including false-citation, seeded-conflict, unit-trap, injection and failure tests
-- [x] **Local status page** with live demos
+## How it is built
 
-Still to do:
+- **SvelteKit** for the pages and the server routes (no separate backend to run)
+- **TypeScript** everywhere
+- **Vitest** for tests
+- **Vercel** for hosting
 
-- [ ] **Connect Convex** and login (needs you to sign in once)
-- [ ] **Wire the engine into Convex:** durable run workflow, evidence store, saved reports
-- [ ] **Run Gemini on news articles** (key works; used today only to read questions and claims) and measure accuracy on a labelled test set
-- [ ] **Finnhub / Indian stock coverage** (needs a Finnhub key), stock ranking data
-- [ ] **Watch jobs:** scheduler, Resend emails, daily digest
-- [ ] **Python evaluation harness** and load tests
-- [ ] **Ops dashboard**, docs, demo video, production deploy
-- [x] **Research briefing:** stories, trust labels, exact quotes, follow and "new since last visit"
-- [x] **Frontend (SvelteKit):** Home, Research, Watch and Invest pages running on live data
+```
+src/routes/        pages and API routes
+src/lib/server/    the logic behind each page
+convex/engine/     the shared engine: data providers, claim checking, ranking
+tests/             automated tests
+docs/              the full design (ARCHITECTURE.md)
+```
+
+## Not investment advice
+
+Verifin shows information from public data using published rules. Past returns do not guarantee
+future returns, and markets can fall.
+
+## Author
+
+Built by **Shreya** ([@Shreya2005-2005](https://github.com/Shreya2005-2005)).
